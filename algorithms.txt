@@ -1,0 +1,7 @@
+---
+to implement
+---
+1. dynammic programming algorithms
+    - policy evaluation
+    - policy improvement
+    - policy iteration

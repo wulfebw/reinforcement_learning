@@ -1,0 +1,6 @@
+---
+to do 
+---
+1. dynammic programming proofs
+    - convergence and optimality of policy evaluation, policy improvement, policy iteration
+    - 

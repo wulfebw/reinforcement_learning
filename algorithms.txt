@@ -5,3 +5,7 @@ to implement
     - policy evaluation
     - policy improvement
     - policy iteration
+    - value iteration
+
+2. monte carlo methods
+    - 

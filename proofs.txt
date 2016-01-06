@@ -3,4 +3,5 @@ to do
 ---
 1. dynammic programming proofs
     - convergence and optimality of policy evaluation, policy improvement, policy iteration
-    - 
+        - specifically, in the case of policy imporovement, that V_pi(s) <= V_pi'(s) for all s ele of S
+        - value iteration and policy iteration do not converge in certain situations (they converge only if dicount is < 1 or if acyclic graph)

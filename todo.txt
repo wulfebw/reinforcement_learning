@@ -1,0 +1,8 @@
+---
+todo
+---
+- policy iteration 
+    - values are correct but policy is incorrect
+    - some issues with the mdp possibly
+    - put in tests for both
+    

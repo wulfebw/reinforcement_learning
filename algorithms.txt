@@ -1,11 +1,34 @@
 ---
 to implement
 ---
-1. dynammic programming algorithms
-    - policy evaluation
-    - policy improvement
-    - policy iteration
-    - value iteration
+
+---
+preliminaries
+---
+1. dynammic programming methods
+    - policy iteration [CHECK]
+        - policy evaluation [CHECK]
+        - policy improvement [CHECK]
+    - value iteration 
 
 2. monte carlo methods
-    - 
+    -
+
+3. model-based rl methods
+    - TD-learning (insofar as it requires a model to produce a policy)
+    - prioritized sweeping
+
+4. model-free rl methods
+    - Q-learning (table, linear, neural net based)
+    - SARSA (table, linear, neural net based)
+
+5. misc
+    - actor-critic
+
+---
+batch methods
+---
+1. batch Q-learing - i.e., Q-learning with experience replay and static target function
+2. fitted Q-iteration (neural)
+3. KADP
+4. least squares policy iteration 

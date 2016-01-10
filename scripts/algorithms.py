@@ -71,7 +71,7 @@ class PolicyIteration(MDPAlgorithm):
             for action in mdp.actions(state):
                 Q[state][action] = sum(prob * (reward + discount * self.V[newState]) 
                             for newState, prob, reward in mdp.succAndProbReward(state, action))
-        
+
         # update policy
         for state, actions in Q.iteritems():
             new_pi = max(actions.iteritems(), key=operator.itemgetter(1))[0]

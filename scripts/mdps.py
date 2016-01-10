@@ -37,9 +37,6 @@ class MDP(object):
         while len(queue) > 0:
             state = queue.pop()
             for action in self.actions(state):
-
-                #print self.succAndProbReward(state, action)
-
                 for newState, prob, reward in self.succAndProbReward(state, action):
                     if newState not in self.states:
                         self.states.add(newState)
@@ -54,7 +51,7 @@ class GridMDP(MDP):
     GOAL_REWARD = 10
     NONGOAL_REWARD = 0
 
-    def __init__(self, side_length, terminal_states=None, rewards=None, discount=0.99):
+    def __init__(self, side_length, terminal_states=None, rewards=None, discount=0.9):
         self.side_length = side_length
         self.discount = discount
         self.grid = None
@@ -63,29 +60,22 @@ class GridMDP(MDP):
         y = random.randint(0, self.side_length - 1)
         self.start_state = x, y
 
-        if terminal_states and rewards:
+        if terminal_states:
             self.terminal_states = terminal_states
-            self.rewards = rewards
         else:
             self.terminal_states = []
             x = random.randint(0, self.side_length - 1)
             y = random.randint(0, self.side_length - 1)
             self.terminal_states.append((x,y))
-            self.rewards = {(x,y): self.GOAL_REWARD}
+        if rewards:
+            self.rewards = rewards
+        else:
+            self.rewards = collections.defaultdict(lambda: self.NONGOAL_REWARD)
+            for terminal in self.terminal_states:
+                self.rewards[terminal] = self.GOAL_REWARD
 
     def actions(self, state):
-        x, y = state
-        actions = []
-        # can move in any direction so long as agent will still be in grid
-        if x > 0:
-            actions.append((-1, 0))
-        if x < self.side_length - 1:
-            actions.append((+1, 0))
-        if y > 0: 
-            actions.append((0, -1))
-        if y < self.side_length - 1:
-            actions.append((0, +1))
-        return actions
+        return [(0,1),(0,-1),(1,0),(-1,0)]
 
     def succAndProbReward(self, state, action): 
         # if terminal state return empty successors and final reward
@@ -96,9 +86,10 @@ class GridMDP(MDP):
         new_x = max(0, min(x + dx, self.side_length - 1))
         new_y = max(0, min(y + dy, self.side_length - 1))
         new_state = new_x, new_y
-        prob = 1
-        reward = self.NONGOAL_REWARD if new_state not in self.terminal_states else self.rewards[new_state]
-        return [((new_x, new_y), prob, reward)]
+        prob = .8
+        reward = self.rewards[new_state]
+        old_reward = self.rewards[state]
+        return [((new_x, new_y), prob, reward), ((x,y), 1 - prob, old_reward)]
 
     def build_grid(self):
         row = ['-'] * self.side_length
@@ -128,9 +119,7 @@ class GridMDP(MDP):
         for ridx, row in enumerate(self.grid):
             for cidx, col in enumerate(row):
                 if col != 'S' and col != 'E':
-                    x, y = pi[(ridx, cidx)]
-                    print (ridx, cidx),
-                    print (x, y)
+                    y, x = pi[(ridx, cidx)]
                     if x == 1:
                         self.grid[ridx][cidx] = '>'
                     elif x == -1:
@@ -149,7 +138,8 @@ class GridMDP(MDP):
         for i, row in enumerate(self.grid):
             for j, col in enumerate(row):
                 if col != 'S' and col != 'E':
-                    self.grid[i][j] = round(V[(i, j)], 2)
+                    if (i,j) in V:
+                        self.grid[i][j] = round(V[(i, j)], 2)
 
         self.print_grid()
 

@@ -342,7 +342,7 @@ class KADP(object):
 
 class FittedQIteration(object):
 
-    def __init__(self, max_iterations, epsilon, discount, learning_rate=0.01):
+    def __init__(self, max_iterations, epsilon, discount, learning_rate=0.1):
         self.max_iterations = max_iterations
         self.epsilon = epsilon
         self.discount = discount
@@ -364,7 +364,9 @@ class FittedQIteration(object):
     def build_dataset(self, replay):
         dataset = []
         for key, (state, action, reward, newState) in replay.memory.iteritems():
-            target = reward + self.discount * max(self.getQ(state, action) for action in self.actions)
+            # over the newState and newAction because it's what's next
+            target = reward + self.discount * max(self.getQ(newState, newAction) 
+                        for newAction in self.actions)
             dataset.append((state, action, target))
         return dataset
 

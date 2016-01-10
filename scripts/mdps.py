@@ -67,12 +67,14 @@ class GridMDP(MDP):
             x = random.randint(0, self.side_length - 1)
             y = random.randint(0, self.side_length - 1)
             self.terminal_states.append((x,y))
+        
+        self.rewards = collections.defaultdict(lambda: self.NONGOAL_REWARD)
         if rewards:
-            self.rewards = rewards
+            self.rewards.update(rewards)
         else:
-            self.rewards = collections.defaultdict(lambda: self.NONGOAL_REWARD)
             for terminal in self.terminal_states:
                 self.rewards[terminal] = self.GOAL_REWARD
+
 
     def actions(self, state):
         return [(0,1),(0,-1),(1,0),(-1,0)]

@@ -1,4 +1,5 @@
 import random
+import collections
 
 import mdps
 import algorithms
@@ -78,9 +79,10 @@ def gather_data(mdp, numTrials=10000, maxIterations=1000):
     return replay
 
 def simulate_offline_RL_Algorithm():
-    mdp = mdps.GridMDP(side_length=5, terminal_states=[(1,1)])
+    rewards = collections.defaultdict(lambda: 0)
+    mdp = mdps.GridMDP(side_length=10, terminal_states=[(0,0),(1,1)], rewards={(0,0):10, (1,1):-10})
     replay = gather_data(mdp)
-    solver = algorithms.FittedQIteration(max_iterations=10, epsilon=0.001, discount=.99)
+    solver = algorithms.FittedQIteration(max_iterations=10, epsilon=0.01, discount=.9)
     solver.fit(replay)
     mdp.print_v_grid(solver.V)
 

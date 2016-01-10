@@ -83,15 +83,28 @@ class GridMDP(MDP):
         # if terminal state return empty successors and final reward
         if state in self.terminal_states:
             return []
+
+        successors = []
+
         x, y = state
         dx, dy = action
         new_x = max(0, min(x + dx, self.side_length - 1))
         new_y = max(0, min(y + dy, self.side_length - 1))
         new_state = new_x, new_y
-        prob = .8
         reward = self.rewards[new_state]
-        old_reward = self.rewards[state]
-        return [((new_x, new_y), prob, reward), ((x,y), 1 - prob, old_reward)]
+        move_prob = .6
+        successors.append(((new_x, new_y), move_prob, reward))
+
+        mistakes = [(1,0),(-1,0),(0,1),(0,-1)]
+        slip_prob = (1.0 - move_prob) / len(mistakes)
+        for dx, dy in mistakes:
+            new_x = max(0, min(x + dx, self.side_length - 1))
+            new_y = max(0, min(y + dy, self.side_length - 1))
+            new_state = new_x, new_y
+            reward = self.rewards[new_state]
+            successors.append(((new_x, new_y), slip_prob, reward))
+
+        return successors
 
     def build_grid(self):
         row = ['-'] * self.side_length

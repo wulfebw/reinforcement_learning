@@ -11,7 +11,6 @@ def has_converged(V, prev_V, epsilon):
         total += abs(v - prev_v)
 
     if total < epsilon:
-        print total
         return True
     return False
 
@@ -293,34 +292,42 @@ class KADP(object):
         self.discount = discount
 
     def build_kernel(self, replay):
+        """
+        :description: builds a kernel to use as a similarity metric. Must define a convex combination of values within individual actions. This needs to be improved.
+        """
         distances = collections.defaultdict(lambda: 0)
         actions = collections.defaultdict(lambda: 0)
-        for key, (state, action, reward, newState) in replay.memory.iteritems():
-            dist = (state[0] - newState[0]) ** 2 + (state[1] - newState[1]) ** 2
-            distances[(state, newState)] = dist
-            actions[action] += dist
+        counts = collections.defaultdict(lambda: 0)
+        self._kernel = collections.defaultdict(lambda: 0)
+        for key, (sigma, action, reward, state) in replay.memory.iteritems():
+                dist = (state[0] - sigma[0]) ** 2 + (state[1] - sigma[1]) ** 2
+                distances[(sigma, state)] = 2 ** -dist
+                actions[action] += 2 ** -dist
 
-        max_dist = max(distances.iteritems(), key=lambda (s,v): v)[1]
         self._kernel = collections.defaultdict(lambda: 0)
         for (state, newState), dist in distances.iteritems():
             for action, total in actions.iteritems():
-                self._kernel[(state, newState, action)] = (max_dist - dist) / float(total)
+                self._kernel[(state, newState, action)] = dist / 4.0
+
+        print self._kernel
 
     def kernel(self, state, cur_state, action):
         return self._kernel[(state, cur_state, action)]
 
-    def get_unqiue_states(self, replay):
+    def set_actions_states(self, replay):
+        actions = set()
         states = set()
         for key, (state, action, reward, newState) in replay.memory.iteritems():
+            actions.add(action)
             states.add(state)
-            states.add(newState)
-        return states
+        self.actions = list(actions)
+        self.states = list(states)
 
     def fit(self, replay):
 
         self.V = collections.defaultdict(lambda: 0)
-        self.states = self.get_unqiue_states(replay)
-        self.n_states = len(self.states)
+        self.set_actions_states(replay)
+        self.num_states = len(self.states)
         self.build_kernel(replay)
 
         for iteration in range(self.max_iterations):
@@ -400,9 +407,4 @@ class FittedQIteration(object):
             if has_converged(self.weights, prev_weights, self.epsilon):
                 break
         self.set_V()
-
-
-
-
-
 

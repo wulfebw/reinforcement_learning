@@ -1,7 +1,7 @@
 
 import random
 
-DEFAULT_CAPACITY = 10000
+DEFAULT_CAPACITY = 1000
 
 class ReplayMemory(object):
     def __init__(self, capacity=DEFAULT_CAPACITY):

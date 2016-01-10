@@ -9,18 +9,18 @@ preliminaries
     - policy iteration [CHECK]
         - policy evaluation [CHECK]
         - policy improvement [CHECK]
-    - value iteration 
+    - value iteration [CHECK]
 
 2. monte carlo methods
     -
 
 3. model-based rl methods
-    - TD-learning (insofar as it requires a model to produce a policy)
+    - TD-learning 
     - prioritized sweeping
 
 4. model-free rl methods
-    - Q-learning (table, linear, neural net based)
-    - SARSA (table, linear, neural net based)
+    - Q-learning [CHECK]
+    - SARSA [CHECK]
 
 5. misc
     - actor-critic
@@ -28,7 +28,6 @@ preliminaries
 ---
 batch methods
 ---
-1. batch Q-learing - i.e., Q-learning with experience replay and static target function
-2. fitted Q-iteration (neural)
-3. KADP
-4. least squares policy iteration 
+1. fitted Q-iteration [CHECK]
+2. KADP [CHECK]
+3. least squares policy iteration 

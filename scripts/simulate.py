@@ -1,16 +1,15 @@
 import random
 import collections
 
-import mdps
 import algorithms
+import mdps
+import learning_utils
 import replay_memory
 
-
-def simulate_MDP_Algorithm():
-    mdp = mdps.GridMDP(side_length=5)
-    solver = algorithms.PolicyIteration(max_iterations=100, epsilon=0.01)
+def simulate_MDP_algorithm(mdp):
+    solver = algorithms.PolicyIteration(max_iterations=1000, epsilon=0.01)
     solver.solve(mdp)
-    mdp.print_v_grid(solver.V)
+    mdp.print_v(solver.V)
 
 def sample(probs):
         target = random.random()
@@ -20,15 +19,16 @@ def sample(probs):
             if accum >= target: return i
         raise Exception("Invalid probs: %s" % probs)
 
-def simulate_online_RL_Algorithm(numTrials=10000, maxIterations=1000):
-    mdp = mdps.GridMDP(side_length=5)
+def simulate_online_RL_algorithm(mdp, numTrials=10000, maxIterations=1000):
     mdp.computeStates()
     actions = mdp.actions(None)
-    discount = 0.9
+    discount = mdp.discount
     explorationProb = 0.5
-    stepSize = 0.1
+    stepSize = 0.05
     action = None
-    rl = algorithms.SARSALearningAlgorithm(actions, discount, explorationProb, stepSize)
+    rl = algorithms.QLearningAlgorithm(actions, discount, explorationProb, stepSize)
+
+    total_rewards = []
 
     for trial in range(numTrials):
         state = mdp.start_state
@@ -45,6 +45,7 @@ def simulate_online_RL_Algorithm(numTrials=10000, maxIterations=1000):
             # Choose a random transition
             i = sample([prob for newState, prob, reward in transitions])
             newState, prob, reward = transitions[i]
+            total_rewards.append(reward)
             action = rl.incorporateFeedback(state, action, reward, newState)
             state = newState
     
@@ -55,8 +56,8 @@ def simulate_online_RL_Algorithm(numTrials=10000, maxIterations=1000):
         action = rl.getAction(state)
         pi[state] = action
         V[state] = rl.getQ(state, action)
-    mdp.print_v_grid(V)
-    mdp.print_pi_grid(pi)
+    mdp.print_v(V)
+    learning_utils.plot_rewards(total_rewards)
 
 def gather_data(mdp, numTrials=10000, maxIterations=1000):
     mdp.computeStates()
@@ -78,13 +79,20 @@ def gather_data(mdp, numTrials=10000, maxIterations=1000):
             state = newState
     return replay
 
-def simulate_offline_RL_Algorithm():
+def simulate_offline_RL_algorithm():
     mdp = mdps.GridMDP(side_length=5)
     replay = gather_data(mdp)
     solver = algorithms.KADP(max_iterations=10, epsilon=0.001, discount=0.9)
     solver.fit(replay)
-    mdp.print_v_grid(solver.V)
+    mdp.print_v(solver.V)
+
+def run():
+    mdp = mdps.TriggerMDP(length=5)
+    print 'online RL algorithm: ',
+    simulate_online_RL_algorithm(mdp)
+    print 'DP algorithm: ',
+    simulate_MDP_algorithm(mdp)
 
 if __name__ == '__main__':
-    simulate_offline_RL_Algorithm()
+    run()
 

@@ -1,0 +1,219 @@
+---
+overview
+---
+
+---
+preliminaries
+---
+- Algorithms
+    1. dynammic programming methods
+        - policy iteration [CHECK]
+            - policy evaluation [CHECK]
+            - policy improvement [CHECK]
+        - value iteration [CHECK]
+
+    2. monte carlo methods
+        - model-based monte carlo
+        - model-free monte carlo
+
+    3. model-based rl methods
+        - TD-learning 
+            - actor critic
+
+    4. model-free rl methods
+        - TD-learning
+            - Q-learning [CHECK]
+            - SARSA [CHECK]
+
+- concepts
+    - 
+
+---
+least squares methods
+---
+- algorithms
+- concepts
+
+---
+batch methods
+---
+- algorithms
+    1. fitted Q-iteration [CHECK]
+    2. KADP [CHECK]
+    3. least squares policy iteration 
+
+- concepts
+    - ?
+    - Rmax proof
+
+---
+learning and using a model
+---
+- algorithms
+    - monte carlo methods
+        - vanilla monte carlo tree search on a learned model
+        - UCT (MCTS with confidence bounds, this is a good one to do)
+        - sparse sampling 
+    - DYNA-Q
+        - with prioritized sweeping
+    - E^3
+    - Rmax
+    - TEXPLORE
+    - PILCO
+
+- concepts
+    - there's really two tasks here
+        - the first is learning the model e.g., through tabular or function approx
+        - the second is using that model, i.e., performing planning through e.g., MCTS
+    - learning of a model using tabular and function approx methods
+    - distinction between probability distribution models and generative models
+    - planning algorithms (that use models)
+        - sparse sampling
+        - UCT
+        - monte carlo tree search
+            - "rollout" is the act of generating a next state, and then using that next state to generate another state, and repeat
+    - sample complexity
+        - of exploration
+            - the number of non-optimal exploratory actions must take to learn optimal policy
+            - lower bound proof
+        - of a models approach to finding the optimal policy
+            - part of this is the sample complexity contributed by exploration (in fact most, because once it has explored sufficiently, the agent can just use the model to find an optimal policy and doesn't need any further samples)
+            - this is effecitvely the number of actions an agent must take to learn the optimal policy
+        - the reason exploration is a big deal when you are learning a model (it's also a big deal when you're not, but here just considering learning a model) is that it accounts for a lot if not most of the sample complexity
+    - three paradigms for learning and using models
+        - the first is to learn the model online -> act, update model, plan, act, ...
+        - the second is offline -> act, collect data, update model, act
+        - the third is "real time architecture" -> act, update model, update agent concurrently
+    - E^3
+    - Rmax
+        - "optimism in face of uncertainty"
+        - separate states into known and unknown
+            - for "known" use MLE transition and reward prob distributions
+            - for "unknown" use the maximum reward so far encountered (Rmax) and T=1
+    - using a model can help imporve exploration
+    - TEXPLORE
+    - continuous domains
+        - 
+
+---
+continous state and action spaces
+---
+- algorithms
+    - 
+
+- concepts
+    - just a general note, there are really two problems in RL
+        - the _control_ problem, i.e., how do you learn a policy
+        - the _prediction_ problem, i.e., how do you learn a state-value or state-action value function
+    - to formulate an MDP for continuous state and action spaces you need to make two changes
+        1. you replace summations with integrals
+        2. you break up the T and R functions into deterministic and stochastic components
+    - there are three primary classes of methods for solving continuous state and action mdps
+        1. learn an (approximate) model - i.e., the T and R functions and use that to determine a state value function
+        2. learn a value function from experience directly (this would be "critic-only methods")
+        3. learn a policy from experience directly (this would be "actor-only methods")
+    - function approximation
+        - what are the ways in which you can approximate a value or policy function?
+        - linear function approx
+            - compute function that linearly combines parameters and features extracted from the state
+            - this involves the same number of parameters as features
+            - linear func approx has some convergence guarantees non-linear function approx does not have
+            - tile-coded features are particularly common with linear function approx
+                - tile coded features are just series of grids laid over the state-space that provide sparsely coded features describing it
+                - can in certain cases not be injective (i.e., phi(s) == phi(s') does not imply s == s'), which means can prevent certain guarantees from applying
+            - you can also use fuzzy representations which are basically tile coded features that are described by some spectrum rather than binary values
+        - non-linear function approx
+            - neural nets are common
+            - generally use gradient descent
+            - there are also some gradient free methods, all of which considered in the text are based on the idea of maintaining some population of solutions which are adapted iteratively
+                - evolutionary methods
+    - applying function approximation
+        - they claim that exact planning on an approximate, learned model doesn't work
+            - should read up on that yo
+        - break down into on-policy off-policy and online offline
+        
+
+
+---
+hierarchical methods
+---
+- algorithms
+    - options
+    - HAMQ
+    - HMSQ
+    - maxQ
+    - HEXQ
+    - skill chaining
+
+- concepts
+    - divide and conquer analogy
+    - semi markov decision processes
+        - temporally extended actions / abstract actions
+        - formulation of value function as two parts (within N steps, beyond N steps)
+    - task hierarchy
+        - a tree with parent-to-child edges where children are polcies over sub tasks, where structure defined manually
+    - equivalence of stochastic finite state machines and policies?
+    - reasons why hierarchical formultion is more efficient from a state-space perspective
+        - remove irrelevant vars
+        - funneling (i.e., moving from one location to another in state space ignore the transistional actions)
+    - optimality
+        - hierarchically optimal policy
+            - policies that are the best possible given the constraints of an imposed hierarchy
+        - recursively optimal policy
+            - a policy that is optimal given the constraints of the policies of its children
+        - hierarchically greedy policy
+            - interrupt subtask at each primitive action to check if still optimal
+    - state abstraction
+        - this just means removing certain components from the state 
+        - prevents the new state from representing everything in the original state; however, now you are dealing with a smaller state space
+    - methods
+        - options
+            - effectively abstract actions
+            - specifically, it is a policy (pi), that has a set of start states I E S, and a probability distribution over stopping states
+            - you can then define a policy over options
+        - HAMQ (hierarchy of abstract machines)
+            - partial program approach
+            - essentially, provide finite state automata as abstract actions
+            - machine is a triple <mu, I, delta>
+                - mu = the set of machine states
+                - I = mapping of MDP states to starting state of machine
+                - delta = mapping MDP and machine state to next machine state
+            - states can have different types in a machine
+                - action state -> take action in mdp
+                - call states -> call sub machines
+                - choice state -> select next state in machine
+                - halt state -> stops machine
+        - maxQ
+            - val function decomposition
+            - basically break the value function into a bunch of parts defined for subtasks and then to determine the value of action a in state s, sum the values of these different value functions
+            - the completion function C gives the expected cumulative reward of taking action a in state s of subtask m
+            - the gist of maxQ is the programmer defines the tasks, then the algorithm learns a different q value for each task, and eventually the hierarchy of tasks learns a recursively optimal value function over the hierarchy
+                - defining the tasks amounts to defining when they end and the reward for ending
+    - learning hierarchical structure
+        - the above methods require structure to be provided. How do we learn structure of hierarchy instead?
+        - bottom-up learning
+            - examples:
+                - searching for common behavior
+                - landmark states
+                - relative novelty
+        - HEXQ 
+            - based on changes in the state-space, formulate different states as "exits" from subtasks, then learn those subtasks
+
+---
+POMDPs
+---
+- algorithms
+    - anytime error minimization search (AEMS)
+
+- concepts
+    - we've previously covered markov decision processes
+        - these assume that the states are markovian in that they capture all information necessary for acting optimally?
+        - what if it is not possible to capture this information? 
+            - for example, a robots sensors might not fully capture where it is, or the sensors might make mistakes
+            - how do you _still act optimally_ in these scenarios?
+                - this is the real question. you could use an MDP to model this, it might even do well, but it in theory could not be able to act optimally, so how do we fix this?
+        - the answer is to introduce a new formalism called a partially observable MDP (POMDP)
+        - they additionally hint that the key is maintaining memory
+    - POMDP model
+        - 
+

@@ -1,7 +1,9 @@
-import sys
-import copy
-import random
+
 import collections
+import copy
+import numpy as np
+import random
+import sys
 
 ###########################################################################
 # From Stanford CS221 Artificial Intelligence 
@@ -79,6 +81,9 @@ class GridMDP(MDP):
     def actions(self, state):
         return [(0,1),(0,-1),(1,0),(-1,0)]
 
+    def get_default_action(self):
+        return (-1, 0)
+
     def succAndProbReward(self, state, action): 
         # if terminal state return empty successors and final reward
         if state in self.terminal_states:
@@ -127,7 +132,7 @@ class GridMDP(MDP):
             print '\n'
         print '\n'
 
-    def print_pi_grid(self, pi):
+    def print_pi(self, pi):
         if self.grid is None:
             self.build_grid()
 
@@ -146,7 +151,7 @@ class GridMDP(MDP):
 
         self.print_grid()
 
-    def print_v_grid(self, V):
+    def print_v(self, V):
         if self.grid is None:
             self.build_grid()
 
@@ -158,19 +163,97 @@ class GridMDP(MDP):
 
         self.print_grid()
 
+class LineMDP(MDP):
+    """
+    :description: A line mdp is just an x axis. Here the rewards are all -1 except for the last state on the right which is +1.
+    """
+    
+    def __init__(self, length):
+        self.length = length
+        self.start_state = 0
+        self.discount = 1
 
+    def get_default_action(self):
+        return 1
 
+    def actions(self, state):
+        return [-1, 1]
 
+    def succAndProbReward(self, state, action): 
+        if state == self.length:
+            return []
 
+        nextState = max(-self.length, state + action)
+        reward = 1 if nextState == self.length else -1
+        return [(nextState, 1, reward)]
 
+    def print_v(self, V):
+        line = ['-'] * (self.length * 2)
+        for vidx, lidx in zip(range(-self.length, self.length), range(self.length * 2)):
+            if vidx in V:
+                line[lidx] = round(V[vidx], 2)
+        print line
 
+    def print_pi(self, pi):
+        line = ['-'] * (self.length * 2)
+        for pidx, lidx in zip(range(-self.length, self.length), range(self.length * 2)):
+            if pidx in pi:
+                line[lidx] = round(pi[pidx], 2)
+        print line
 
+class TriggerMDP(MDP):
+    """
+    :description: A trigger mdp where if the agent hits the most negative position then on completing the mdp to right it receives a much higher reward
+    """
+    
+    def __init__(self, length):
+        self.length = length
+        self.start_state = (0, False)
+        self.discount = 1
+        self.triggered = False
 
+    def get_default_action(self):
+        return 1
 
+    def actions(self, state):
+        return [-1, 1]
 
+    def succAndProbReward(self, state, action): 
+        # if we reach the far right then this episode ends
+        if state[0] == self.length:
+            self.triggered = False
+            return []
 
+        if state[0] == -self.length:
+            self.triggered = True
 
+        # o/w return a single, deterministic transition in the direction of the action
+        nextState = max(-self.length, state[0] + action)
 
+        reward = -1
+        # if we have triggered the switch then the reward is must higher
+        if nextState == self.length:
+            if self.triggered == True:
+                reward = 1000
+            else:
+                reward = 1
+        nextState = (nextState, self.triggered)
 
+        return [(nextState, 1, reward)]
 
+    def print_v(self, V):
+        line = np.zeros(self.length * 4).reshape(2, self.length * 2)
+        for ridx, row in enumerate(line):
+            for vidx, cidx in zip(range(-self.length, self.length), range(self.length * 2)):
+                triggered = False if ridx == 0 else True
+                if (vidx, triggered) in V:
+                    line[ridx, cidx] = round(V[(vidx, triggered)], 2)
+        print line
+
+    def print_pi(self, pi):
+        line = ['-'] * (self.length * 2)
+        for pidx, lidx in zip(range(-self.length, self.length), range(self.length * 2)):
+            if pidx in pi:
+                line[lidx] = round(pi[pidx], 2)
+        print line
 

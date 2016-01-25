@@ -82,8 +82,9 @@ class PolicyIteration(MDPAlgorithm):
     def solve(self, mdp):
         mdp.computeStates()
         self.pi = {}
+        default_action = mdp.get_default_action()
         for state in mdp.states:
-            self.pi[state] = (-1, 0)
+            self.pi[state] = default_action
         self.V = collections.defaultdict(lambda: 0)
         prev_V = collections.defaultdict(lambda: 0)
 
@@ -111,8 +112,9 @@ class ValueIteration(MDPAlgorithm):
     def solve(self, mdp):
         mdp.computeStates()
         self.pi = {}
+        default_action = mdp.get_default_action()
         for state in mdp.states:
-            self.pi[state] = (-1, 0)
+            self.pi[state] = default_action
         self.V = collections.defaultdict(lambda: 0)
         prev_V = collections.defaultdict(lambda: 0)
 
@@ -407,4 +409,31 @@ class FittedQIteration(object):
             if has_converged(self.weights, prev_weights, self.epsilon):
                 break
         self.set_V()
+
+### Hierarchical Methods ##################################################
+
+class MaxQQ(object):
+
+    def __init__(self, actions, discount, explorationProb, stepSize):
+        self.actions = actions
+        self.discount = discount
+        self.explorationProb = explorationProb
+        self.weights = collections.Counter()
+        self.numIters = 1
+        self.stepSize = stepSize
+
+    def feature_extractor(self, state, action):
+        """
+        :description: this is the identity feature extractor, so we use tables here for the function
+        """
+        return [((state, action), 1)]
+
+    def getAction(self, state):
+        pass
+
+    def incorporateFeedback(self, state, action, reward, newState): 
+        pass
+
+
+
 

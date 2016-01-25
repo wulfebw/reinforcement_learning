@@ -1,0 +1,162 @@
+- NOTE: the test will in large part revolve around the papers discussed and these questions totally ignore those questions - need to get questions on all the papers
+---
+intro
+---
+- what algorithms are considered approximate DP?
+- what's the relationship between non-markovian MDPs and POMDPs
+- what do you do if a task cannot be modeled as an MDP? Do such tasks exist?
+- what is the difference between a state-value function and an action-value function?
+    - state value function is V(s), action-value function is Q(a,s)
+- what are the differences between TD-learning and Q-learning/sarsa?
+    - TD-learning learning is a set of algorithms that use the current value approximation of the next state as a target value, in estimating either V(s) or Q(s,a)
+    - Q-learning is an off-policy version of TD learning that learns Q(s,a)
+    - sarsa is an on-policy version of TD learning that learns Q(s,a)
+- what's the difference between a "plan" and a "policy"?
+    - plan is a sequence of actions to take
+    - this doesn't work for an MDP because it has random transitions and a plan only describes actions
+    - instead need to know what to do at every state, and this is called a policy
+- in what cases is there a closed form solution for an MDP?
+- does the y-contraction in the max norm proof only apply for discrete state spaces? 
+    - probably because it relies on a summation over the probabilities which is not possible in continuous space
+    - this might not have anything to do with convergence, it is just saying that the bellman operator reduces the difference between two Value functions
+- is it reasonable to use a neural network function approximator with sarsa?
+- between SARSA and Q-learning which is to be prefered when?
+- can eligibility traces perform as well as DYNA methods?
+- why is learning a model called "planning"?
+- 
+
+---
+batch
+---
+- why would we want to assume uniformly random distribution of the samples? 
+- how to solve stability issues?
+- inefficiences in stochastic approx refers to what?
+- what is KADP
+    - how does H^a_dp approximate the ‘true’ (model-based) DP-step for individual dp actions from the observed transitions?
+    - what would change if you used an exact DP operator H instead of H^? What would this require?
+    - what should be used in the kernel? 
+    - What's the relationship between the sum over the entire dataset where entries are weighted and updating based upon just the individual entries iteratively?
+- what is the kernel accomplishing in KADP? is that what is performing similarity between states?
+- what are the main differences between DQN and neural fitted Q-iteration?
+- what's the relationship between the static target function and the fitted/supervised batch methods?
+    - target function is a method of implementing fitted/supervised methods
+- what are artificial patterns? how do you find them in the state-space? what do they accomplish?
+- why do we normalize/scale input to nnet?
+- why do we smooth out the cost function?
+- are eligibility traces an example batch learning?
+- why are asynch updates unstable from a math perspective?
+- 
+
+---
+least squares methods
+---
+- how do you derive the bound on the value of the Q/V-functions? (bound is max(rewards) / 1-discount)
+- why does policy imporvement with a V-function require a model?
+- how do you represent a policy?
+    - you can implicitly represent it by querying the learned value function for on demand actions
+- why can the solution to the Bellman equation typically not be represented by a function?
+- what do they use as the "actual Q value"?
+- why do updates terminate?
+- what do they mean by "projected"?
+- how does analytical solution work? How does it account for mdp traits?
+- what's a basis function?
+- is Rmax just optimistic exploration that persists through some number of visits?
+- how does sampling come in?
+- what is sample complexity applied to? the algorithm of the mdp?
+- Rmax proofs? How does this work, how do you prove it? [TEST]
+
+---
+learning and using models
+---
+- how does monte carlo tree search not need a distribution over probabilities?
+- what are the different classes of learnable models?
+- what is a factored domain?
+    - something to do with dynamic bayes nets?
+- in what ways can a model help imporve exploration?
+- what is a gaussian process?
+- what is a kernel?
+- why are continuous domains particularly difficult here?
+- why does texplore not have gaurantees on optimality?
+- what are the differences between continuous and discrete TEXPLORE?
+- when does it make sense to run mcts on a learned model? Is there a situation where you would be running a DQN and also learn a model and run mcts on it? what is mcts? what does it accomplish?
+- does actor critic require that all critic learning is a result of the learned model?
+- can you use value iteration and policy iteration on a purely generative model? i.e., one that does not provide the transition and reward _probabiities_ just sample?
+- what does it mean that MCTS "builds a tree of visited-state action pairs out from the current state"?
+- how do DYNA and prioritized sweeping relate to monte carlo methods?
+- difference between regular sample efficiency and exploratory sample efficiecny?
+- isn't a replay memory sort of just a nonparametric approach to a model?
+- in a situation where the state is nonMarkovian, can a model allow for optimal action selection
+- is supervised learning of a model regression or classification? or does it depend?
+- are there any DP approaches outside of generalized policy iteration?
+- is DYNA an "architecture" or is it a planning method?
+- when is planning necessary? is it only for improving sample complexity or is there some use for planning when the MDP is actually a POMDP or just generally an non-markov-dp in which the state does not allow for optimal actions?
+- difference between learning a model and a critic?
+    - model predicts the next reward, critic predicts the value (sum of discounted future rewards)
+
+---
+continous state and action spaces
+---
+- what is "general policy gradient"?
+- why does the book formulate T and R as having explicit noise terms? couldn't this be portrayed through the probability distributions in the model? Why formulate as a deterministic part and stochastic part?
+    - because it helps with proofs
+- are kernel-based methods always nonparametric? Are they ever nonparametric? When is an SVM nonparametric if ever?
+- they claim planning on a learned, approximate model is not effective. Has this changed at all since the publishing of the text? Why was/is this the case?
+    - what algorithms even try to do this?
+- policy gradient algorithms - do proof of policy gradient
+    - specifically whats this grad f(x) = f(x) grad log f(x) thing?
+        - because they use boltzman distribution and the log comes out from this
+    - policy gradient with stochastic policy to make gradient calc easier
+- policy gradient, V_pi not available, how to estimate the gradient of V_pi?
+- why do they emphasize natural gradient so much?
+    - page 220 -> can speed convergence depending on manifold of loss function
+- what is this bias stuff?
+- how does gaussian exploration work? Can you implement a continous toy mdp to try it out?
+- difference between action space and policy space ("an _error_ in action space rather than in policy space")?
+- why discretize?   
+    - for the reasons they give -> approximate b/c might not be injective i.e., V(s) == V(s') doesn't implay s == s'
+- why prefer gradient-free methods? 
+    - "large # of local minimum"
+    - can use both in finding good spots and then gradient based for finding that local optimum
+- gradient-free optimization
+    - this is related to evolutionary methods
+        - these are general methods for global optimization
+    - is this just gibbs sampling?
+    - in sampling why not just take the highest value sampled? is it possible to find a better value but just using a mean over the good values?
+    - is Gaussian mixture model is gradient free method?
+- whats the difference between residual method of value func approx vs regular TD method?
+- convergence proof on midterm + should also prove it anyway
+- what is B_t(s_t) in the policy gradient method? 
+    - beta is a step size similar to alpha
+        - why does beta depend on the state whereas alpha doesnt?
+- why does the critic in actor-critic make evaluation easier?
+- what does CACLA accomplish?
+
+---
+hierarchical approaches
+---
+- what does "decompose the task hierarchy" mean?
+- aren't "value to termination" of the subtask and "value to termination" of the abstract action the same thing?
+- what are the differences between the different types of optimalities?
+- how do you compose subtasks in a manner that achieves globally optimal value?
+- why is the C(.,.,.) function necessary in maxq?
+    - why does it not include an immediate reward value?
+    - 
+- what are the REINFORCE algorithms?
+- when would you use HAMQ? when do you just happen to have a finite state machine that solves a given subtask?
+- what is the nongoal vs goal distinction for the subtask terminal states?
+- why would you ever use the HAM approach rather than the options approach? Can you learn the HAM? 
+- what are the similarities and differences between skill chanining and HEXQ?
+- how is maxQ different from skill chaining? maxQ " defines each subtask in terms of a termination predicate and local reward function" -> doesn't skill chaining do this as well with it's trigger function and 
+
+---
+POMDPs
+---
+- what is error in estimate due to for AEMS?
+- what does it mean that they assume the model exists? 
+- how is a POMDP equivalent to an MDP? (beliefs with all prob dist weight on one state?)
+- differences between "offline", "online", "anytime" in the context of a POMDP?
+- difference between omega and O in POMDP?
+- why do we want to maximize / expand the state that maximizing error?
+- where do upper/lower bounds come from?
+- why is memory or the concept of a history important in a POMDP?
+- 

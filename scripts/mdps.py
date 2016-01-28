@@ -291,12 +291,14 @@ class MazeMDP(MDP):
          room_size must be odd
     """
 
+    EXIT_REWARD = 100
+    MOVE_REWARD = 0
+
     def __init__(self, room_size, num_rooms):
         self.room_size = room_size
         self.num_rooms = num_rooms
+        self.discount = .99
         self.start_state = (1,1)
-        self.discount = 1
-        self.exit_reward = 100
         self.max_position = self.room_size * self.num_rooms - 1
         self.end_state = (self.max_position - 1, self.max_position - 1)
 
@@ -321,12 +323,12 @@ class MazeMDP(MDP):
         doorway_position = (self.room_size) / 2
         # check horizontal movement through doorway
         if next_state[0] != state[0]:
-            if next_state[1] == doorway_position:
+            if next_state[1] % self.room_size == doorway_position:
                 return False
 
         # check vertical movement through doorway
         if next_state[1] != state[1]:
-            if next_state[0] == doorway_position:
+            if next_state[0] % self.room_size == doorway_position:
                 return False
 
         # 3. check if movement was through a wall
@@ -347,6 +349,7 @@ class MazeMDP(MDP):
         if next_state[1] % room_size == room_size - 1 and state[1] % room_size == 0:
             return True
 
+        # if none of the above conditions meet, then have not passed through wall
         return False
 
     def succAndProbReward(self, state, action): 
@@ -363,11 +366,19 @@ class MazeMDP(MDP):
             next_state = self.calculate_next_state(state, action)
 
         # if next state is exit, then set reward
-        reward = 0
+        reward = self.MOVE_REWARD
         if next_state == self.end_state:
-            reward = self.exit_reward
+            reward = self.EXIT_REWARD
 
         return [(next_state, 1, reward)]
+
+    def print_v(self, V):
+        for ridx in reversed(range(self.max_position + 1)):
+            for cidx in range(self.max_position + 1):
+                if (ridx, cidx) in V:
+                    print round(V[(ridx, cidx)], 1),
+            print('\n')
+
 
 
 

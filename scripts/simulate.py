@@ -26,9 +26,10 @@ def simulate_online_RL_algorithm(mdp, numTrials=10000, maxIterations=1000):
     explorationProb = 0.5
     stepSize = 0.05
     action = None
-    rl = algorithms.QLearningAlgorithm(actions, discount, explorationProb, stepSize)
+    rl = algorithms.SARSALearningAlgorithm(actions, discount, explorationProb, stepSize)
 
     total_rewards = []
+    total_reward = 0
 
     for trial in range(numTrials):
         state = mdp.start_state
@@ -45,9 +46,12 @@ def simulate_online_RL_algorithm(mdp, numTrials=10000, maxIterations=1000):
             # Choose a random transition
             i = sample([prob for newState, prob, reward in transitions])
             newState, prob, reward = transitions[i]
-            total_rewards.append(reward)
+            total_reward += reward
             action = rl.incorporateFeedback(state, action, reward, newState)
             state = newState
+
+        total_rewards.append(total_reward)
+        total_reward = 0
     
     V = {}
     pi = {}
@@ -56,8 +60,8 @@ def simulate_online_RL_algorithm(mdp, numTrials=10000, maxIterations=1000):
         action = rl.getAction(state)
         pi[state] = action
         V[state] = rl.getQ(state, action)
-    mdp.print_v(V)
-    learning_utils.plot_rewards(total_rewards)
+
+    return total_rewards, V
 
 def gather_data(mdp, numTrials=10000, maxIterations=1000):
     mdp.computeStates()
@@ -87,10 +91,12 @@ def simulate_offline_RL_algorithm():
     mdp.print_v(solver.V)
 
 def run():
-    mdp = mdps.MazeMDP(room_size=5, num_rooms=1)
-    print 'online RL algorithm: ',
-    simulate_online_RL_algorithm(mdp)
-    print 'DP algorithm: ',
+    mdp = mdps.MazeMDP(room_size=5, num_rooms=5)
+    print 'online RL algorithm: '
+    total_rewards, V = simulate_online_RL_algorithm(mdp)
+    mdp.print_v(V)
+    learning_utils.plot_rewards(total_rewards)
+    print 'DP algorithm: '
     simulate_MDP_algorithm(mdp)
 
 if __name__ == '__main__':

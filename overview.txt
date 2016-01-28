@@ -99,7 +99,35 @@ learning and using a model
 continous state and action spaces
 ---
 - algorithms
-    - 
+    - function approximation methods
+        - gradient based
+            - gradient descent 
+            - 
+        - gradient free
+            - Covariance matrix adaptation evolution strategies (CMA-ES)
+            - Natural evolutionary strategies (NES)
+            - Cross-entropy optimization methods
+    - RL algorithms
+        - value approx based (i.e., critics)
+            - on-policy
+                - online
+                    - TD learning
+                    - sarsa
+                - offline
+                    - least squares policy iteration (LSPI)
+                    - least-squared temporal difference (LSTD)
+                    - least-squares policy evaluation (LSPE)
+            - off-policy
+                - online
+                    - Q-learning
+                    - double Q-learning
+                    - GTD2 (Gradient Temporal-Difference Learning, version 2)
+                    - residual-gradient algorithm
+                    - GQ(λ) 
+                    - actor-critic and natural actor critic
+                        - CACLA
+                - offline
+                    - fitted Q-iteration
 
 - concepts
     - just a general note, there are really two problems in RL
@@ -132,8 +160,6 @@ continous state and action spaces
             - should read up on that yo
         - break down into on-policy off-policy and online offline
         
-
-
 ---
 hierarchical methods
 ---

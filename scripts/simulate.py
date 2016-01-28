@@ -87,7 +87,7 @@ def simulate_offline_RL_algorithm():
     mdp.print_v(solver.V)
 
 def run():
-    mdp = mdps.TriggerMDP(length=5)
+    mdp = mdps.MazeMDP(room_size=5, num_rooms=1)
     print 'online RL algorithm: ',
     simulate_online_RL_algorithm(mdp)
     print 'DP algorithm: ',

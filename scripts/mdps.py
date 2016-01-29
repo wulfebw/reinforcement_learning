@@ -355,7 +355,7 @@ class MazeMDP(MDP):
     def succAndProbReward(self, state, action): 
 
         # if we reach the end state then the episode ends
-        if state == self.end_state:
+        if np.array_equal(state, self.end_state):
             return []
 
         if self.runs_into_wall(state, action):
@@ -367,7 +367,7 @@ class MazeMDP(MDP):
 
         # if next state is exit, then set reward
         reward = self.MOVE_REWARD
-        if next_state == self.end_state:
+        if np.array_equal(next_state, self.end_state):
             reward = self.EXIT_REWARD
 
         return [(next_state, 1, reward)]

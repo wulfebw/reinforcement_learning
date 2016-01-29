@@ -19,7 +19,7 @@ def better_moving_average(array, alpha):
     averages = []
     average = array[0]
     for val in array:
-        average = (1 - alpha) * average + alpha * val
+        average = (1 - alpha) * average + alpha * int(val)
         averages.append(average)
     return averages
 

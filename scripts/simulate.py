@@ -200,6 +200,126 @@ def simulate_symbolic_online_RL_algorithm(mdp, num_episodes, max_iterations):
     # return the list of rewards attained
     return total_rewards, total_losses
 
+
+
+########################################################
+# symbolic RL with keras
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation
+from keras.layers.normalization import BatchNormalization
+from keras.optimizers import Adam
+
+import copy
+import sys
+
+MIN_EXPLORATION_PROB = .05
+
+def transfer_weights(from_network, to_network):
+    from_layers = from_network.layers
+    to_layers = to_network.layers
+    assert len(from_layers) == len(to_layers), 'weight transfer must be between identical networks'
+    for from_layer, to_layer in zip(from_layers, to_layers):
+        to_layer.set_weights(from_layer.get_weights())
+
+def build_network(target=False):
+    trainable = True
+    if target: 
+        trainable = False
+
+    # network
+    network = Sequential()
+
+    network.add(Dense(10, init='he_normal', input_shape=(2,), trainable=trainable))
+    #network.add(BatchNormalization())
+    network.add(Activation('relu'))
+
+    network.add(Dense(10, init='he_normal', trainable=trainable))
+    #network.add(BatchNormalization())
+    network.add(Activation('relu'))
+
+    network.add(Dense(10, init='he_normal', trainable=trainable))
+    #network.add(BatchNormalization())
+    network.add(Activation('relu'))
+
+    network.add(Dense(4, init='he_normal', trainable=trainable))
+    network.add(Activation('linear')) 
+
+    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+    network.compile(loss='mse', optimizer=adam)
+    return network
+
+
+def simulate_keras_online_RL_algorithm(mdp, num_episodes, max_iterations):
+    
+    print 'compiling model...'
+    mdp.computeStates()
+    q_network = build_network()
+    target_network = build_network(target=True)
+    transfer_weights(q_network, target_network)
+
+    # actions
+    real_actions = mdp.actions(None)
+    actions = np.arange(len(real_actions))
+
+    explorationProb = .3
+    exploration_reduction = (explorationProb - MIN_EXPLORATION_PROB) / num_episodes
+    discount = mdp.discount
+    frozen_update_period = 25
+
+    total_rewards = []
+    total_steps = []
+    trajectory = []
+    print 'starting training...'
+    for episode in xrange(num_episodes):
+        state = np.array(mdp.start_state)
+        total_reward = 0
+        trajectory = []
+        if episode % frozen_update_period == 0:
+            transfer_weights(q_network, target_network)
+
+        for iteration in xrange(max_iterations):
+
+            q_values = q_network.predict(np.reshape(state, (1,2)), batch_size=1)
+            if random.random() < explorationProb:
+                action = random.choice(actions)
+            else:
+                action = np.argmax(q_values)
+            
+            real_action = real_actions[action]
+            trajectory.append(real_action)
+            transitions = mdp.succAndProbReward(state, real_action)
+
+            if len(transitions) == 0:
+                break
+
+            # Choose a random transition
+            i = sample([prob for newState, prob, reward in transitions])
+            newState, prob, reward = transitions[i]
+            newState = np.array(newState)
+            reward = np.clip(reward, -1, 1)
+
+            next_q_values = target_network.predict(np.reshape(newState, (1,2)), batch_size=1)
+            target = reward + discount * np.max(next_q_values)
+            y = np.zeros((1, 4))
+            y[0][:] = q_values
+            y[0][action] = target
+            
+            q_network.fit(np.reshape(state, (1,2)), y, batch_size=1, nb_epoch=1, verbose=1)
+
+            total_reward += reward
+            state = newState
+
+        explorationProb -= exploration_reduction
+
+        total_rewards.append(total_reward)
+        total_steps.append(iteration)
+
+    V = {}
+    for state in mdp.states:
+        V[state] = np.argmax(q_network.predict(np.reshape(state, (1,2)), batch_size=1))
+
+    return total_rewards, total_steps, trajectory, V
+
 ########################################################
 # offline RL algorithms
 # 1. neural fitted Q-iteration
@@ -237,9 +357,22 @@ def simulate_offline_RL_algorithm():
 
 def run_nnet():
     mdp = mdps.MazeMDP(room_size=5, num_rooms=2)
-    total_rewards, total_losses = simulate_symbolic_online_RL_algorithm(mdp=mdp, num_episodes=200, max_iterations=500)
+    total_rewards, total_losses = simulate_symbolic_online_RL_algorithm(mdp=mdp, num_episodes=700, max_iterations=100)
     learning_utils.plot_rewards(total_rewards)
     learning_utils.plot_rewards(total_losses)
+
+def run_keras_nnet():
+    mdp = mdps.MazeMDP(room_size=5, num_rooms=2)
+    num_episodes = 200
+    total_rewards, total_steps, trajectory, V = simulate_keras_online_RL_algorithm(mdp=mdp, num_episodes=num_episodes, max_iterations=100)
+    print 'average_reward: {}'.format(np.mean(total_rewards[num_episodes / 2:]))
+    print 'average_steps: {}'.format(np.mean(total_steps[num_episodes / 2]))
+    learning_utils.plot_rewards(total_rewards)
+    learning_utils.plot_rewards(total_steps)
+    print trajectory
+    mdp.print_trajectory(trajectory)
+    print V
+    mdp.print_v(V)
 
 def run():
     mdp = mdps.MazeMDP(room_size=5, num_rooms=5)
@@ -251,5 +384,5 @@ def run():
     simulate_MDP_algorithm(mdp)
 
 if __name__ == '__main__':
-    run_nnet()
+    run_keras_nnet()
 

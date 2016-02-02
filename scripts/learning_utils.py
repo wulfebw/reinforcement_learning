@@ -23,8 +23,7 @@ def better_moving_average(array, alpha):
         averages.append(average)
     return averages
 
-
 def plot_rewards(rewards):
-    avg_rewards = better_moving_average(rewards, .005)
+    avg_rewards = better_moving_average(rewards, .01)
     plt.plot(avg_rewards)
     plt.show()

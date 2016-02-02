@@ -297,7 +297,7 @@ class MazeMDP(MDP):
     def __init__(self, room_size, num_rooms):
         self.room_size = room_size
         self.num_rooms = num_rooms
-        self.discount = .99
+        self.discount = 1
         self.start_state = (1,1)
         self.max_position = self.room_size * self.num_rooms - 1
         self.end_state = (self.max_position - 1, self.max_position - 1)
@@ -379,6 +379,27 @@ class MazeMDP(MDP):
                     print round(V[(ridx, cidx)], 1),
             print('\n')
 
+    def print_maze(self, coordinates):
+        for row in range(self.room_size):
+            for col in range(self.room_size):
+                if coordinates == (row,col):
+                    print '*',
+                elif self.end_state == (row,col):
+                    print 'e',
+                else:
+                    print '-',
+            print '\n'
+        print '\n'
 
+    def print_trajectory(self, actions):
+        coordinates = self.start_state
+        self.print_maze(coordinates)
+        for action in actions:
+            coordinates = (coordinates[0] + action[0], coordinates[1] + action[1])
+            self.print_maze(coordinates)
 
-
+if __name__ == '__main__':
+    mdp = MazeMDP(5,1)
+    print mdp.end_state
+    trajectory = [(1,0),(1,0),(0,1)]
+    mdp.print_trajectory(trajectory)

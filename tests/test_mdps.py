@@ -348,6 +348,22 @@ class TestMazeMDP(unittest.TestCase):
         expected = False
         self.assertEquals(actual, expected)
 
+    def test_corner_movement_up(self):
+        mdp = mdps.MazeMDP(room_size=5, num_rooms=1)
+        state = (4,4)
+        action = (0,1)
+        actual = mdp.runs_into_wall(state, action)
+        expected = True
+        self.assertEquals(actual, expected)
+
+    def test_corner_movement_right(self):
+        mdp = mdps.MazeMDP(room_size=5, num_rooms=1)
+        state = (4,4)
+        action = (1,0)
+        actual = mdp.runs_into_wall(state, action)
+        expected = True
+        self.assertEquals(actual, expected)
+
 if __name__ == '__main__':
     # this runs all tests in file if executed directly (e.g., python test_nnet.py)
     # run a single test by specifying the name (e.g., python test_nnet.py 
